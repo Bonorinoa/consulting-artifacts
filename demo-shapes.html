@@ -1,0 +1,126 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><style>
+:root{
+  --ink:var(--foreground,#22201d);
+  --dim:var(--muted-foreground,#6b6660);
+  --rule:var(--border,#ddd6c9);
+  --acc:var(--accent,#7a2e2e);
+  --panel:var(--card,#faf7f1);
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:ui-sans-serif,system-ui,-apple-system,sans-serif;color:var(--ink)}
+.hdr{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--acc);margin-bottom:4px}
+h1{font-size:20px;margin:0 0 6px;font-weight:600;letter-spacing:-.01em}
+.sub{font-size:13px;color:var(--dim);max-width:78ch;line-height:1.5;margin-bottom:22px}
+.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;align-items:start}
+.card{border:1px solid var(--rule);border-radius:3px;background:var(--panel);overflow:hidden;min-width:0}
+.ch{padding:13px 15px;border-bottom:1px solid var(--rule)}
+.num{font-family:ui-monospace,monospace;font-size:10px;letter-spacing:.2em;color:var(--acc)}
+.ttl{font-size:14px;font-weight:600;margin-top:5px}
+.q{font-size:12px;color:var(--dim);font-style:italic;margin-top:3px;line-height:1.4}
+.verb{display:inline-block;margin-top:8px;font-family:ui-monospace,monospace;font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;border:1px solid var(--rule);border-radius:2px;padding:2px 6px;color:var(--dim)}
+.body{padding:14px 15px 15px}
+.cap{font-size:11.5px;color:var(--dim);line-height:1.5;margin-top:13px;padding-top:11px;border-top:1px solid var(--rule)}
+.cap b{color:var(--ink);font-weight:600}
+
+/* upstream coverage grid */
+.matrix{display:grid;grid-template-columns:52px repeat(6,1fr);gap:5px;align-items:center}
+.rowlab{font-size:9px;color:var(--dim);font-family:ui-monospace,monospace;letter-spacing:.04em}
+.dot{width:100%;aspect-ratio:1;border-radius:50%;border:1px solid var(--rule);background:transparent}
+.dot.on{background:var(--acc);border-color:var(--acc)}
+.dot.cov{box-shadow:0 0 0 2px var(--panel),0 0 0 3.5px var(--acc)}
+.collab{font-size:8.5px;color:var(--dim);font-family:ui-monospace,monospace;text-align:center;letter-spacing:.04em}
+.collab.cov{color:var(--acc);font-weight:600}
+
+/* midstream bars */
+.bars{margin-top:2px}
+.bar{display:grid;grid-template-columns:1fr;gap:3px;margin-bottom:8px}
+.bl{font-size:9.5px;font-family:ui-monospace,monospace;color:var(--dim);display:flex;justify-content:space-between}
+.bl .v{color:var(--ink)}
+.bt{height:7px;background:var(--rule);border-radius:1px;position:relative;overflow:hidden}
+.bf{position:absolute;left:0;top:0;bottom:0;background:var(--acc);border-radius:1px}
+.bar.zero .bf{background:var(--dim)}
+.bar.zero .bl .v{color:var(--acc)}
+.inert{opacity:.45}
+
+/* downstream range */
+.rng{margin-top:2px}
+.rt{font-size:9.5px;font-family:ui-monospace,monospace;color:var(--dim);display:flex;justify-content:space-between;margin-bottom:3px}
+.track{height:15px;background:transparent;border-radius:1px;position:relative;border:1px solid var(--rule);margin-bottom:7px}
+.tick{position:absolute;top:0;bottom:0;width:1px;background:var(--rule)}
+.span{position:absolute;top:3px;bottom:3px;background:var(--acc);border-radius:1px;opacity:.85}
+.tag{font-size:9px;font-family:ui-monospace,monospace;color:var(--dim)}
+.tag.dim{opacity:.6}
+</style></head><body>
+
+<div class="hdr">consulting · demo shapes</div>
+<h1>Three demos, three shapes</h1>
+<div class="sub">Same pipeline, three different decisions — so three different interactions. If all three are a slider in a Streamlit app, the visitor learns one thing three times and the tiles blur.</div>
+
+<div class="grid">
+
+  <div class="card">
+    <div class="ch">
+      <div class="num">01 — UPSTREAM</div>
+      <div class="ttl">Which measure is worth building first?</div>
+      <div class="q">&ldquo;We need to measure something we can&rsquo;t observe yet.&rdquo;</div>
+      <div class="verb">interaction: allocate</div>
+    </div>
+    <div class="body">
+      <div class="matrix">
+        <div></div><div class="collab">m1</div><div class="collab">m2</div><div class="collab cov">m3</div><div class="collab">m4</div><div class="collab cov">m5</div><div class="collab">m6</div>
+        <div class="rowlab">impl A</div><div class="dot on"></div><div class="dot"></div><div class="dot on cov"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div>
+        <div class="rowlab">impl B</div><div class="dot"></div><div class="dot on"></div><div class="dot on cov"></div><div class="dot on"></div><div class="dot on cov"></div><div class="dot"></div>
+        <div class="rowlab">impl C</div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot on cov"></div><div class="dot on"></div>
+        <div class="rowlab">impl D</div><div class="dot on"></div><div class="dot on"></div><div class="dot on cov"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div>
+      </div>
+      <div class="cap">Implications you declared (rows) &times; candidate measures (columns). The <b>reduction is the smallest column set that covers them</b> — here 2 of 6. The other four are decoration until an implication needs them.</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="ch">
+      <div class="num">02 — MIDSTREAM &nbsp;<span style="color:var(--acc)">· built</span></div>
+      <div class="ttl">Which measure is load-bearing?</div>
+      <div class="q">&ldquo;Is our measure entitled to the claim we&rsquo;re making?&rdquo;</div>
+      <div class="verb">interaction: delete</div>
+    </div>
+    <div class="body">
+      <div class="bars">
+        <div class="bar"><div class="bl"><span>full menu</span><span class="v">width 0.075</span></div><div class="bt"><div class="bf" style="width:100%"></div></div></div>
+        <div class="bar zero"><div class="bl"><span>− m_gps_patience</span><span class="v">0.000 &nbsp;|M*|=1</span></div><div class="bt"><div class="bf" style="width:2%"></div></div></div>
+        <div class="bar zero"><div class="bl"><span>− m_prompt_a</span><span class="v">0.000 &nbsp;|M*|=1</span></div><div class="bt"><div class="bf" style="width:2%"></div></div></div>
+        <div class="bar inert"><div class="bl"><span>− m_wvs_q13</span><span class="v">0.075</span></div><div class="bt"><div class="bf" style="width:100%"></div></div></div>
+        <div class="bar inert"><div class="bl"><span>− m_wvs_q14</span><span class="v">0.075</span></div><div class="bt"><div class="bf" style="width:100%"></div></div></div>
+        <div class="bar inert"><div class="bl"><span>− m_composite</span><span class="v">0.075</span></div><div class="bt"><div class="bf" style="width:100%"></div></div></div>
+        <div class="bar inert"><div class="bl"><span>− m_noise</span><span class="v">0.075</span></div><div class="bt"><div class="bf" style="width:100%"></div></div></div>
+      </div>
+      <div class="cap">Real numbers, your fixture. 5 of 7 are inert. The two that aren&rsquo;t drive width to <b>zero — which reads as a tighter answer and is a narrower evidential base.</b></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="ch">
+      <div class="num">03 — DOWNSTREAM <span style="color:var(--dim)">· superseded → see downstream-options.html</span></div>
+      <div class="ttl">What do we collect next?</div>
+      <div class="q">&ldquo;Is the number defensible — and what do we do?&rdquo;</div>
+      <div class="verb">interaction: add</div>
+    </div>
+    <div class="body">
+      <div class="rng">
+        <div class="rt"><span>baseline</span><span>[0.33, 0.40]</span></div>
+        <div class="track"><div class="tick" style="left:25%"></div><div class="tick" style="left:75%"></div><div class="span" style="left:25%;width:50%"></div></div>
+        <div class="rt"><span>+ discriminating evidence</span><span>[0.35, 0.38]</span></div>
+        <div class="track"><div class="tick" style="left:25%"></div><div class="tick" style="left:75%"></div><div class="span" style="left:35%;width:30%"></div></div>
+        <div class="rt"><span>+ discriminating evidence</span><span>[0.36, 0.37]</span></div>
+        <div class="track"><div class="tick" style="left:25%"></div><div class="tick" style="left:75%"></div><div class="span" style="left:42%;width:16%"></div></div>
+        <div class="rt"><span>+ more of the same</span><span>[0.36, 0.37]</span></div>
+        <div class="track" style="border-style:dashed"><div class="tick" style="left:25%"></div><div class="tick" style="left:75%"></div><div class="span" style="left:42%;width:16%;opacity:.35"></div></div>
+        <div class="tag dim">volume added — range unmoved</div>
+      </div>
+      <div class="cap">Mirror of the reduction curve. Adding <b>volume</b> doesn&rsquo;t shrink the range; adding evidence that <b>discriminates between the competing assumptions</b> does. Ends in what to collect next.</div>
+    </div>
+  </div>
+
+</div>
+</body></html>

@@ -1,0 +1,22 @@
+# --- python ---
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+
+# --- secrets / credentials (never commit) ---
+.env
+.env.*
+*.pem
+*.key
+secrets/
+
+# --- local agent state ---
+.hermes/
+
+# --- OS / editors ---
+.DS_Store
+*.swp
+.idea/
+.vscode/

@@ -1,0 +1,80 @@
+{
+  "protocol": {
+    "near_dup_threshold": 0.99,
+    "test": "page-as-query, within-course, stored embeddings only"
+  },
+  "per_course": [
+    {
+      "course": "econ101",
+      "pages": 149,
+      "files": 20,
+      "self_recall_at_1": 1.0,
+      "self_recall_at_10": 1.0,
+      "mrr": 1.0,
+      "worst_self_rank": 1,
+      "pages_not_in_own_top10": 0,
+      "near_duplicate_pairs_at_0.99": 0,
+      "top1_is_never_self": 149,
+      "top1_similarity_median": 0.9175,
+      "top1_similarity_p10": 0.888,
+      "filename_collision_examples": []
+    },
+    {
+      "course": "econ167",
+      "pages": 338,
+      "files": 11,
+      "self_recall_at_1": 1.0,
+      "self_recall_at_10": 1.0,
+      "mrr": 1.0,
+      "worst_self_rank": 1,
+      "pages_not_in_own_top10": 0,
+      "near_duplicate_pairs_at_0.99": 0,
+      "top1_is_never_self": 338,
+      "top1_similarity_median": 0.8964,
+      "top1_similarity_p10": 0.8568,
+      "filename_collision_examples": []
+    },
+    {
+      "course": "econ57",
+      "pages": 122,
+      "files": 5,
+      "self_recall_at_1": 1.0,
+      "self_recall_at_10": 1.0,
+      "mrr": 1.0,
+      "worst_self_rank": 1,
+      "pages_not_in_own_top10": 0,
+      "near_duplicate_pairs_at_0.99": 0,
+      "top1_is_never_self": 122,
+      "top1_similarity_median": 0.9193,
+      "top1_similarity_p10": 0.8741,
+      "filename_collision_examples": []
+    },
+    {
+      "course": "math387",
+      "pages": 97,
+      "files": 5,
+      "self_recall_at_1": 1.0,
+      "self_recall_at_10": 1.0,
+      "mrr": 1.0,
+      "worst_self_rank": 1,
+      "pages_not_in_own_top10": 0,
+      "near_duplicate_pairs_at_0.99": 0,
+      "top1_is_never_self": 97,
+      "top1_similarity_median": 0.9145,
+      "top1_similarity_p10": 0.867,
+      "filename_collision_examples": []
+    }
+  ],
+  "separation": {
+    "within_course_top_neighbour_min": 0.7513,
+    "within_course_top_neighbour_p10": 0.8629,
+    "off_corpus_max_similarity_p90": 0.8517,
+    "off_corpus_max_similarity_max": 0.9503,
+    "separable_by_single_threshold": false
+  },
+  "totals": {
+    "courses": 4,
+    "pages": 706,
+    "near_duplicate_pairs": 0
+  }
+}

@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Consulting — v3 (curated panel + propagation)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --paper: 38 44% 94%;
+    --paper-deep: 36 36% 86%;
+    --ink: 24 40% 8%;
+    --rule: 36 24% 72%;
+    --muted-ink: 28 18% 28%;
+    --oxblood: 11 56% 27%;
+    --serif:"Fraunces","Iowan Old Style",Georgia,serif;
+    --mono:"Geist Mono",ui-monospace,"SF Mono",monospace;
+    --ease:cubic-bezier(.16,1,.3,1);
+    --dur:240ms;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{background:hsl(var(--paper));color:hsl(var(--ink))}
+  body{font-family:var(--serif);-webkit-font-smoothing:antialiased;line-height:1.45}
+  a{color:inherit}
+  .page{max-width:1120px;margin:0 auto;padding:26px 28px 96px}
+
+  nav{display:flex;align-items:baseline;justify-content:space-between;
+      border-bottom:1px solid hsl(var(--rule));padding-bottom:13px;font-size:13px}
+  nav .who{font-style:italic;font-size:14px}
+  nav .links{display:flex;gap:1.6rem;letter-spacing:.04em;color:hsl(var(--muted-ink))}
+  nav a{text-decoration:none}
+  nav a[aria-current]{color:hsl(var(--oxblood))}
+
+  .kicker{font-family:var(--mono);font-size:11px;letter-spacing:.2em;
+          text-transform:uppercase;color:hsl(var(--oxblood))}
+  header{margin:52px 0 30px;display:grid;grid-template-columns:1.05fr .95fr;gap:40px;align-items:end}
+  h1{font-size:clamp(2.5rem,5.6vw,3.9rem);font-weight:500;letter-spacing:-.03em;
+     line-height:1.03;margin-top:12px}
+  .lede{font-size:1.05rem;font-style:italic;color:hsl(var(--muted-ink));max-width:32rem;padding-bottom:5px}
+  .lede em{font-style:normal;color:hsl(var(--ink))}
+
+  /* ---------- split ---------- */
+  .split{margin-top:34px;display:grid;grid-template-columns:minmax(290px,.86fr) 1.14fr;
+         border:1px solid hsl(var(--rule))}
+  .choices{display:flex;flex-direction:column;justify-content:center;gap:10px;
+           padding:22px;background:hsl(var(--paper-deep)/.32);
+           border-right:1px solid hsl(var(--rule))}
+
+  .choice{position:relative;text-align:left;font:inherit;color:inherit;cursor:pointer;
+          background:hsl(var(--paper));border:1px solid hsl(var(--rule));border-radius:2px;
+          padding:13px 16px 15px;display:block;
+          transition:border-color var(--dur) var(--ease),box-shadow var(--dur) var(--ease),
+                     opacity var(--dur) var(--ease)}
+  .choice:hover{border-color:hsl(var(--oxblood))}
+  .choice:focus-visible{outline:2px solid hsl(var(--oxblood));outline-offset:2px}
+  .choice .num{font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:hsl(var(--oxblood))}
+  .choice .name{display:block;font-size:1.1rem;font-weight:500;margin-top:2px}
+  .choice .scope{display:block;font-size:.85rem;color:hsl(var(--muted-ink));margin-top:3px}
+
+  /* propagation between stages.
+     ::before = the connection. Always visible, so the three stages read as one
+       pipeline even in a still frame or under reduced motion.
+     ::after  = the glint. Travels down and fades, intermittently (visible for
+       roughly 9% of a 7s cycle), suggesting information moving between stages.
+     Decorative only: removing both leaves a working, readable page. */
+  .choice + .choice::before{
+    content:"";position:absolute;left:26px;top:-10px;width:1px;height:10px;
+    background-image:repeating-linear-gradient(to bottom,
+      hsl(var(--oxblood)/.38) 0 3px, transparent 3px 8px);
+    background-size:1px 8px;background-repeat:repeat-y;
+  }
+  .choice + .choice::after{
+    content:"";position:absolute;left:25px;top:-11px;width:3px;height:4px;
+    border-radius:1px;background:hsl(var(--oxblood));opacity:0;
+    animation:glint 7s linear infinite;
+  }
+  .choice[data-stage="downstream"]::after{animation-delay:1.15s}
+  @keyframes glint{
+    0%{transform:translateY(0);opacity:0}
+    4%{opacity:.85}
+    13%{transform:translateY(12px);opacity:0}
+    100%{transform:translateY(12px);opacity:0}
+  }
+
+  .split[data-stage="upstream"]   .choice[data-stage="upstream"],
+  .split[data-stage="midstream"]  .choice[data-stage="midstream"],
+  .split[data-stage="downstream"] .choice[data-stage="downstream"]{
+    border-color:hsl(var(--oxblood));box-shadow:5px 5px 0 0 hsl(var(--oxblood)/.16);
+  }
+  .split[data-stage="upstream"]   .choice:not([data-stage="upstream"]),
+  .split[data-stage="midstream"]  .choice:not([data-stage="midstream"]),
+  .split[data-stage="downstream"] .choice:not([data-stage="downstream"]){opacity:.5}
+
+  /* ---------- curated detail: five elements, nothing else ---------- */
+  .detail{padding:30px 34px 34px;background:hsl(var(--paper));
+          display:flex;flex-direction:column;gap:20px}
+  .detail h2{font-size:1.5rem;font-weight:500;letter-spacing:-.02em;line-height:1.2;margin-top:9px}
+  .detail .body{color:hsl(var(--muted-ink));max-width:38rem}
+  .red{padding-top:16px;border-top:1px solid hsl(var(--rule));max-width:38rem}
+  .red b{font-weight:500;color:hsl(var(--ink))}
+  .links{display:flex;flex-wrap:wrap;gap:8px 20px;align-items:baseline;
+         padding-top:16px;border-top:1px solid hsl(var(--rule))}
+  .links .lbl{font-family:var(--mono);font-size:10px;letter-spacing:.14em;
+              text-transform:uppercase;color:hsl(var(--muted-ink));width:100%}
+  .links a{font-size:14px;text-decoration:none;border-bottom:1px solid hsl(var(--oxblood)/.35);
+           padding-bottom:2px}
+  .links a:hover{border-color:hsl(var(--oxblood))}
+  .links a.soon{color:hsl(var(--muted-ink));border-bottom-style:dashed;pointer-events:none}
+
+  .cta-row{margin-top:32px;display:flex;gap:20px;align-items:baseline;flex-wrap:wrap}
+  .cta{display:inline-block;padding:10px 17px;border:1px solid hsl(var(--oxblood));
+       color:hsl(var(--oxblood));text-decoration:none;font-size:15px;border-radius:2px;
+       transition:background var(--dur) var(--ease),color var(--dur) var(--ease)}
+  .cta:hover{background:hsl(var(--oxblood));color:hsl(var(--paper))}
+  .cta-note{font-size:14px;font-style:italic;color:hsl(var(--muted-ink))}
+
+  .band{margin-top:52px;padding-top:20px;border-top:1px solid hsl(var(--rule));
+        display:grid;grid-template-columns:150px 1fr;gap:24px}
+  .band h3{font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;
+           font-weight:400;color:hsl(var(--oxblood))}
+  .band p{max-width:44rem;color:hsl(var(--muted-ink))}
+  .band p + p{margin-top:12px}
+  .band .pull{font-style:italic;color:hsl(var(--ink))}
+
+  .rail3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:28px}
+  .rail3 .kind{font-family:var(--mono);font-size:10px;letter-spacing:.14em;
+               text-transform:uppercase;color:hsl(var(--muted-ink))}
+  .rail3 h4{font-size:1.02rem;font-weight:500;margin:5px 0 6px}
+  .rail3 a{text-decoration:none}
+  .rail3 a:hover{color:hsl(var(--oxblood))}
+  .rail3 p{font-size:14px;color:hsl(var(--muted-ink))}
+
+  form{max-width:36rem}
+  .f{margin-bottom:18px}
+  label{display:block;font-family:var(--mono);font-size:10px;letter-spacing:.16em;
+        text-transform:uppercase;color:hsl(var(--muted-ink));margin-bottom:7px}
+  input,textarea{width:100%;background:hsl(var(--paper));border:1px solid hsl(var(--rule));
+                 border-radius:2px;padding:9px 11px;font:inherit;font-size:15px;color:inherit;
+                 outline:none;transition:border-color var(--dur) var(--ease)}
+  textarea{resize:vertical;min-height:74px}
+  input:focus,textarea:focus{border-color:hsl(var(--oxblood))}
+  button.cta{cursor:pointer;font-family:var(--serif);min-height:44px}
+
+  footer{margin-top:64px;padding-top:16px;border-top:1px solid hsl(var(--rule));
+         font-family:var(--mono);font-size:10px;letter-spacing:.16em;
+         text-transform:uppercase;color:hsl(var(--muted-ink))}
+
+  @media (max-width:880px){
+    header,.split,.band{grid-template-columns:1fr}
+    .choices{border-right:0;border-bottom:1px solid hsl(var(--rule))}
+    .rail3{grid-template-columns:1fr}
+  }
+  @media (prefers-reduced-motion:reduce){
+    *{transition:none !important;animation:none !important}
+    .choice + .choice::after{display:none}
+    .choice + .choice::before{background-image:repeating-linear-gradient(to bottom,
+      hsl(var(--oxblood)/.45) 0 3px, transparent 3px 8px)}
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <nav>
+    <a class="who" href="#">A. González-Bonorino</a>
+    <div class="links">
+      <a href="#">Academic</a><a href="#">Build</a><a href="#" aria-current="page">Consulting</a>
+    </div>
+  </nav>
+
+  <header>
+    <div>
+      <p class="kicker">§ Independent review</p>
+      <h1>Consulting</h1>
+    </div>
+    <div>
+      <p class="lede">Independent review at three stages of an empirical pipeline — criteria
+        <em>frozen before the result</em>, so the finding is one you can act on.</p>
+    </div>
+  </header>
+
+  <div class="split" id="split" data-stage="midstream">
+    <div class="choices">
+      <button class="choice" data-stage="upstream">
+        <span class="num">01</span><span class="name">Upstream</span>
+        <span class="scope">define the construct · generate measures · process data</span>
+      </button>
+      <button class="choice" data-stage="midstream">
+        <span class="num">02</span><span class="name">Midstream</span>
+        <span class="scope">specification &amp; multiverse analysis · admissible set M*</span>
+      </button>
+      <button class="choice" data-stage="downstream">
+        <span class="num">03</span><span class="name">Downstream</span>
+        <span class="scope">estimand · estimator · identified range [L,U] · robustness</span>
+      </button>
+    </div>
+
+    <div class="detail">
+      <div>
+        <span class="kicker" id="d-kicker"></span>
+        <h2 id="d-title"></h2>
+      </div>
+      <p class="body" id="d-body"></p>
+      <p class="red" id="d-red"></p>
+      <div class="links">
+        <span class="lbl">Evidence</span>
+        <div id="d-links" style="display:flex;flex-wrap:wrap;gap:8px 20px"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="cta-row">
+    <a class="cta" href="#start">Describe a decision</a>
+    <span class="cta-note">Twenty minutes. Deadline and cost of being wrong, not a pitch deck.</span>
+  </div>
+
+  <section class="band how">
+    <h3>How I work</h3>
+    <div>
+      <p class="pull">“It is useless to quantify uncertainty without a strategy to reduce it.”</p>
+      <p>Every engagement ends with what to do next, not with a range. When the evidence does not
+         identify an answer, that is the finding — reported as such, never sharpened to look decisive.</p>
+    </div>
+  </section>
+
+  <section class="band writing">
+    <h3>Also written</h3>
+    <div class="rail3">
+      <article>
+        <span class="kind">Substack</span>
+        <h4><a href="https://augustogbonorino.substack.com/p/construct-identified-inference">Construct-Identified Inference</a></h4>
+        <p>Measurement, specification, and sampling as three separate uncertainties.</p>
+      </article>
+      <article>
+        <span class="kind">Journal</span>
+        <h4><a href="https://arxiv.org/abs/2501.06834">Synthetic Cultural Agents</a></h4>
+        <p>Whether simulated respondents preserve human patterns. Failures included.</p>
+      </article>
+      <article>
+        <span class="kind">Column</span>
+        <h4><a href="#">La Gaceta · ADEPA</a></h4>
+        <p>Public writing, not a service tile.</p>
+      </article>
+    </div>
+  </section>
+
+  <section class="band form" id="start">
+    <h3>Start here</h3>
+    <form onsubmit="event.preventDefault();alert('mailto: wired in the real build')">
+      <div class="f"><label for="decision">What decision?</label><textarea id="decision"></textarea></div>
+      <div class="f"><label for="deadline">Deadline</label><input id="deadline" type="text" /></div>
+      <div class="f"><label for="cost">Cost of being wrong</label><textarea id="cost"></textarea></div>
+      <div class="f"><label for="email">Your email (optional)</label><input id="email" type="email" /></div>
+      <button class="cta" type="submit">Describe a decision</button>
+    </form>
+  </section>
+
+  <footer>© 2026 Augusto González-Bonorino · design study v3, not published</footer>
+</div>
+
+<script>
+const STAGES = {
+  upstream: {
+    kicker: "01 · upstream",
+    title: "We need to measure something we can't observe yet",
+    body: "I define the construct, propose candidate measures, and build the processing chain — with provenance on every transformation, so a reviewer can see where each number came from.",
+    red: "<b>The reduction:</b> which measure is worth building first.",
+    links: [["Measurement menu — template", "#"], ["cvprofiles (open source)", "https://github.com/Bonorinoa/cvprofiles"]]
+  },
+  midstream: {
+    kicker: "02 · midstream",
+    title: "Is our measure entitled to the claim we're making?",
+    body: "Construct validity as partial identification: the admissible measurement set M*, and the range of conclusions your assumptions actually permit. An empty set is a finding.",
+    red: "<b>The reduction:</b> which measure is load-bearing — remove it and the conclusion moves — and which to drop.",
+    links: [["Construct-Identified Inference", "https://augustogbonorino.substack.com/p/construct-identified-inference"], ["cvprofiles (open source)", "https://github.com/Bonorinoa/cvprofiles"], ["Interactive demo — in build", "#"]]
+  },
+  downstream: {
+    kicker: "03 · downstream",
+    title: "Is the number defensible — and what do we do?",
+    body: "Estimand, estimator, estimate, then the robustness work — including an explicit statement of what the evidence does not establish.",
+    red: "<b>The reduction:</b> what to collect next to shrink the range.",
+    links: [["Reproducibility audit — in build", "#"], ["Synthetic Cultural Agents", "https://arxiv.org/abs/2501.06834"]]
+  }
+};
+
+const split = document.getElementById("split");
+
+function render(stage){
+  const s = STAGES[stage];
+  document.getElementById("d-kicker").textContent = s.kicker;
+  document.getElementById("d-title").textContent  = s.title;
+  document.getElementById("d-body").textContent   = s.body;
+  document.getElementById("d-red").innerHTML      = s.red;
+  document.getElementById("d-links").innerHTML    =
+    s.links.map(([l,h]) => `<a href="${h}"${h==="#"?` class="soon"`:""}>${l}</a>`).join("");
+  split.dataset.stage = stage;
+}
+
+document.querySelectorAll(".choice").forEach(c => {
+  c.addEventListener("click", () => render(c.dataset.stage));
+});
+
+const params = new URLSearchParams(location.search);
+render(STAGES[params.get("stage")] ? params.get("stage") : "midstream");
+</script>
+</body>
+</html>

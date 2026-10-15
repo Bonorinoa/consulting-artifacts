@@ -1,0 +1,177 @@
+{
+  "q1_citation_ambiguity": {
+    "econ101": {
+      "pages": 149,
+      "pairs": 11026,
+      "pairs_ge_0.99": 0,
+      "pairs_ge_0.97": 0,
+      "pairs_ge_0.95": 0,
+      "pairs_ge_0.93": 22,
+      "pairs_ge_0.9": 179,
+      "examples": [
+        {
+          "threshold": 0.95,
+          "same_file_pairs": 0,
+          "cross_file_pairs": 0,
+          "examples_cross_file": []
+        },
+        {
+          "threshold": 0.93,
+          "same_file_pairs": 18,
+          "cross_file_pairs": 4,
+          "examples_cross_file": [
+            {
+              "a": "13 - Liquidity Preference & LM Curve.pdf p.4",
+              "b": "14 - IS-LM curve.pdf p.1",
+              "cosine": 0.949
+            },
+            {
+              "a": "14 - IS-LM curve.pdf p.6",
+              "b": "16 - Mundell-Fleming Model (1).pdf p.2",
+              "cosine": 0.9363
+            },
+            {
+              "a": "14 - IS-LM curve.pdf p.7",
+              "b": "16 - Mundell-Fleming Model (1).pdf p.2",
+              "cosine": 0.9481
+            },
+            {
+              "a": "16 - Mundell-Fleming Model (1).pdf p.8",
+              "b": "18 - Fixed Exchange Rate & Interest Rate Differentials.pdf p.4",
+              "cosine": 0.9351
+            }
+          ]
+        }
+      ]
+    },
+    "econ167": {
+      "pages": 338,
+      "pairs": 56953,
+      "pairs_ge_0.99": 0,
+      "pairs_ge_0.97": 0,
+      "pairs_ge_0.95": 2,
+      "pairs_ge_0.93": 36,
+      "pairs_ge_0.9": 263,
+      "examples": [
+        {
+          "threshold": 0.95,
+          "same_file_pairs": 2,
+          "cross_file_pairs": 0,
+          "examples_cross_file": []
+        },
+        {
+          "threshold": 0.93,
+          "same_file_pairs": 35,
+          "cross_file_pairs": 1,
+          "examples_cross_file": [
+            {
+              "a": "8- Heteroskedasticity and Autocorrelation.pdf p.19",
+              "b": "Lecture+Notes.pdf p.70",
+              "cosine": 0.9359
+            }
+          ]
+        }
+      ]
+    },
+    "econ57": {
+      "pages": 122,
+      "pairs": 7381,
+      "pairs_ge_0.99": 0,
+      "pairs_ge_0.97": 5,
+      "pairs_ge_0.95": 7,
+      "pairs_ge_0.93": 24,
+      "pairs_ge_0.9": 91,
+      "examples": [
+        {
+          "threshold": 0.95,
+          "same_file_pairs": 6,
+          "cross_file_pairs": 1,
+          "examples_cross_file": [
+            {
+              "a": "Lecture_2.pdf p.2",
+              "b": "Lecture_3.pdf p.2",
+              "cosine": 0.9518
+            }
+          ]
+        },
+        {
+          "threshold": 0.93,
+          "same_file_pairs": 19,
+          "cross_file_pairs": 5,
+          "examples_cross_file": [
+            {
+              "a": "Lecture4.pdf p.1",
+              "b": "Lecture_2.pdf p.1",
+              "cosine": 0.9468
+            },
+            {
+              "a": "Lecture_1.pdf p.1",
+              "b": "Lecture_2.pdf p.1",
+              "cosine": 0.9362
+            },
+            {
+              "a": "Lecture_2.pdf p.1",
+              "b": "Lecture_3.pdf p.1",
+              "cosine": 0.9318
+            },
+            {
+              "a": "Lecture_2.pdf p.2",
+              "b": "Lecture_3.pdf p.2",
+              "cosine": 0.9518
+            },
+            {
+              "a": "Lecture_2.pdf p.9",
+              "b": "Lecture_3.pdf p.6",
+              "cosine": 0.9409
+            }
+          ]
+        }
+      ]
+    },
+    "math387": {
+      "pages": 97,
+      "pairs": 4656,
+      "pairs_ge_0.99": 0,
+      "pairs_ge_0.97": 0,
+      "pairs_ge_0.95": 0,
+      "pairs_ge_0.93": 9,
+      "pairs_ge_0.9": 76,
+      "examples": [
+        {
+          "threshold": 0.95,
+          "same_file_pairs": 0,
+          "cross_file_pairs": 0,
+          "examples_cross_file": []
+        },
+        {
+          "threshold": 0.93,
+          "same_file_pairs": 9,
+          "cross_file_pairs": 0,
+          "examples_cross_file": []
+        }
+      ]
+    }
+  },
+  "q2_relevance_gate": {
+    "on_corpus_best_neighbour": {
+      "min": 0.7513,
+      "p10": 0.8629,
+      "median": 0.9087,
+      "max": 0.9769
+    },
+    "off_corpus_best_neighbour": {
+      "min": 0.7415,
+      "p10": 0.7877,
+      "median": 0.8282,
+      "p90": 0.8791,
+      "max": 0.9503
+    },
+    "overlap_region": [
+      0.9503,
+      0.7513
+    ],
+    "separable_by_single_threshold": false,
+    "pages_where_offcorpus_beats_oncorpus": 33,
+    "pages_total": 706
+  }
+}

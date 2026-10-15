@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Upstream sketch — missing-first</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;1,9..144,400&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#f6f1e9;--paper:#faf7f1;--ink:#22201d;--dim:#6b6660;--rule:#ddd6c9;--acc:#7a2e2e}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:Fraunces,Georgia,serif;background:var(--bg);color:var(--ink);line-height:1.45;padding:28px 22px 48px;max-width:720px}
+  .kicker{font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--acc)}
+  h1{font-size:30px;font-weight:500;letter-spacing:-.02em;margin:10px 0 8px;line-height:1.15}
+  .lede{font-size:16px;font-style:italic;color:var(--dim);margin-bottom:22px}
+  .stat{font-size:42px;font-weight:500;letter-spacing:-.03em}
+  .stat span{font-size:16px;font-style:italic;color:var(--dim);display:block;margin-top:4px}
+  .q{margin:22px 0 10px;font-size:16px}
+  .opt{display:block;width:100%;text-align:left;font-family:Fraunces,serif;font-size:16px;padding:12px 14px;margin:8px 0;border:1px solid var(--rule);background:var(--paper);cursor:pointer}
+  .opt:hover,.opt.on{border-color:var(--acc)}
+  .ans{margin-top:18px;padding-top:14px;border-top:1px solid var(--rule);font-size:16px;min-height:4.5em}
+  .ans em{font-style:italic;color:var(--acc)}
+  .disc{margin-top:22px;font-size:12px;color:var(--dim)}
+</style>
+</head>
+<body>
+  <div class="kicker">01 · upstream · sketch C — missing-first</div>
+  <h1>The index is sound. The gate is not.</h1>
+  <p class="lede">Two of three ship-criteria already passed. The uncovered one is abstention.</p>
+  <div class="stat">33 / 706<span>pages closer to another course than to their own</span></div>
+  <p class="q">To know whether this assistant should refuse a question, which measure would you build next?</p>
+  <button class="opt" data-k="cos">A cosine similarity cutoff on the existing embeddings</button>
+  <button class="opt" data-k="lab">A labeled set of in-corpus vs off-corpus queries</button>
+  <button class="opt" data-k="more">More of the same: another embedding model, same pages</button>
+  <div class="ans" id="ans">Pick one. The audit already ran two of these.</div>
+  <p class="disc">Class A advisory demonstration — Silicus-TA 2.0 self-audit, 706 pages. Integrity self-recall@1 = 1.000. separable_by_single_threshold = false.</p>
+<script>
+const A = {
+  cos: 'Already tried. On-corpus neighbour median 0.909; off-corpus median 0.828; the distributions overlap. <em>A cutoff either admits the wrong course or rejects legitimate pages.</em>',
+  lab: 'This is the missing measurement. Embed a labeled query set — in-corpus and off-corpus — <em>before</em> you tune a gate. The audit named it and did not have it.',
+  more: 'The failure is not a weak embedding. It is that page-level vectors of dense course notes encode register (“this is an academic page”), not topic. <em>Another model of the same pages will not cover abstention.</em>',
+};
+document.querySelectorAll('.opt').forEach(b => b.onclick = () => {
+  document.querySelectorAll('.opt').forEach(x => x.classList.remove('on'));
+  b.classList.add('on');
+  document.getElementById('ans').innerHTML = A[b.dataset.k];
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Upstream sketch — coverage / allocate</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;1,9..144,400&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#f6f1e9;--paper:#faf7f1;--ink:#22201d;--dim:#6b6660;--rule:#ddd6c9;--acc:#7a2e2e;--ok:#2f4f3e}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:Fraunces,Georgia,serif;background:var(--bg);color:var(--ink);line-height:1.45;padding:28px 22px 48px}
+  .kicker{font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--acc)}
+  h1{font-size:28px;font-weight:500;letter-spacing:-.02em;margin:8px 0 6px}
+  .lede{font-size:16px;font-style:italic;color:var(--dim);max-width:62ch;margin-bottom:8px}
+  .note{font-family:"IBM Plex Mono",monospace;font-size:11px;color:var(--dim);margin-bottom:22px;max-width:72ch}
+  .board{border:1px solid var(--rule);background:var(--paper);border-radius:2px;overflow:hidden}
+  table{width:100%;border-collapse:collapse}
+  th,td{border-bottom:1px solid var(--rule);padding:10px 12px;vertical-align:middle}
+  th{font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.08em;font-weight:500;text-align:center}
+  th.rowh,td.rowh{text-align:left;width:28%;font-family:Fraunces,serif}
+  td.rowh{font-size:14px;font-weight:500}
+  td.rowh span{display:block;font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.06em;color:var(--dim);font-weight:400;margin-top:3px}
+  .colbtn{all:unset;cursor:pointer;display:block;width:100%;text-align:center;padding:4px 0}
+  .colbtn .name{font-family:"IBM Plex Mono",monospace;font-size:10.5px;letter-spacing:.04em}
+  .colbtn .meta{display:block;font-size:9px;color:var(--dim);margin-top:3px;letter-spacing:.04em}
+  .on .name{color:var(--acc)}
+  .cell{text-align:center;font-size:18px;color:var(--rule)}
+  .cell.hit{color:var(--acc)}
+  .cell.miss{color:var(--dim);opacity:.35}
+  .cell.fake{color:var(--dim);text-decoration:line-through}
+  .status{font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase}
+  .status.ok{color:var(--ok)}
+  .status.no{color:var(--acc)}
+  .out{padding:16px 18px;border-top:1px solid var(--rule);display:grid;grid-template-columns:1fr auto;gap:12px;align-items:start}
+  .sent{font-size:18px;font-weight:500;max-width:46ch}
+  .sent em{font-style:italic;color:var(--acc)}
+  .red{font-family:"IBM Plex Mono",monospace;font-size:11px;color:var(--dim);text-align:right;max-width:28ch}
+  .disc{margin-top:16px;font-size:12px;color:var(--dim);max-width:78ch}
+  .disc strong{color:var(--ink);font-weight:500}
+</style>
+</head>
+<body>
+  <div class="kicker">01 · upstream · sketch A — allocate</div>
+  <h1>Which measure is worth building first?</h1>
+  <p class="lede">A citation-backed course assistant. The construct — “is this retrieval fit to rely on?” — is unobservable. You choose which tests to fund.</p>
+  <p class="note">Numbers are from a frozen self-audit of Silicus-TA 2.0 (706 pages, 4 courses, revision 4c58084). The covers-relation is a reading of that audit, not a computation it performed. Click a column to fund or defund it.</p>
+
+  <div class="board">
+    <table id="grid"></table>
+    <div class="out">
+      <div class="sent" id="sent"></div>
+      <div class="red" id="red"></div>
+    </div>
+  </div>
+  <p class="disc"><strong>Class A advisory demonstration</strong> — not independent assurance. Integrity (self-recall@1 = 1.000) passed; 33 of 706 pages are closer to another course than their own; a single cosine threshold cannot separate them.</p>
+
+<script>
+const IMPL = [
+  {id:'integrity', name:'The index isn’t corrupted', hint:'a page retrieves itself first'},
+  {id:'citation',  name:'The citation identifies a page', hint:'a student who opens it finds the claim'},
+  {id:'abstention',name:'The system can refuse', hint:'off-topic questions are not dressed as evidence'},
+];
+const MEAS = [
+  {id:'self', name:'self-recall@1', meta:'built', built:true, covers:['integrity'], fake:[]},
+  {id:'dup',  name:'near-dup ≥0.99', meta:'built', built:true, covers:['citation'], fake:[]},
+  {id:'cos',  name:'cosine threshold', meta:'built · fails', built:true, covers:[], fake:['abstention']},
+  {id:'lab',  name:'labeled query set', meta:'not built', built:false, covers:['abstention'], fake:[]},
+  {id:'hyb',  name:'BM25 + dense', meta:'not built', built:false, covers:[], fake:[]},
+];
+const on = Object.fromEntries(MEAS.map(m => [m.id, m.built]));
+
+function covered(implId){
+  return MEAS.some(m => on[m.id] && m.covers.includes(implId));
+}
+function faked(implId){
+  return MEAS.some(m => on[m.id] && m.fake.includes(implId)) && !covered(implId);
+}
+function render(){
+  const head = `<tr><th class="rowh">Implication you declared</th>${MEAS.map(m =>
+    `<th><button class="colbtn ${on[m.id]?'on':''}" data-id="${m.id}"><span class="name">${m.name}</span><span class="meta">${on[m.id] ? (m.built?'funded':'added') : 'off'} · ${m.meta}</span></button></th>`
+  ).join('')}<th>covered?</th></tr>`;
+  const rows = IMPL.map(im => {
+    const ok = covered(im.id);
+    const fk = faked(im.id);
+    const cells = MEAS.map(m => {
+      const hit = m.covers.includes(im.id);
+      const fake = m.fake.includes(im.id);
+      const cls = !on[m.id] ? 'miss' : hit ? 'hit' : fake ? 'fake' : 'miss';
+      const mark = !on[m.id] ? '·' : hit ? '●' : fake ? '×' : '·';
+      return `<td class="cell ${cls}">${mark}</td>`;
+    }).join('');
+    const st = ok ? '<span class="status ok">yes</span>' : fk ? '<span class="status no">looks like yes</span>' : '<span class="status no">no</span>';
+    return `<tr><td class="rowh">${im.name}<span>${im.hint}</span></td>${cells}<td>${st}</td></tr>`;
+  }).join('');
+  document.getElementById('grid').innerHTML = head + rows;
+  document.querySelectorAll('.colbtn').forEach(b => b.onclick = () => { on[b.dataset.id] = !on[b.dataset.id]; render(); });
+
+  const missing = IMPL.filter(im => !covered(im.id)).map(im => im.id);
+  const labOn = on.lab;
+  const cosOn = on.cos;
+  let sent, red;
+  if (missing.length === 0){
+    sent = 'Every declared implication is covered. The expensive one was the <em>labeled query set</em> — not another embedding.';
+    red = 'reduction: stop. ship with a gate you actually measured.';
+  } else if (missing.includes('abstention') && cosOn && !labOn){
+    sent = 'You already funded a cosine gate. It <em>cannot refuse</em> — 33 of 706 pages are closer to another course than their own.';
+    red = 'reduction: build the labeled query set. more of the same embeddings will not cover abstention.';
+  } else if (missing.includes('integrity')){
+    sent = 'You defunded the only test of index integrity. The rest of the matrix is then uninterpretable.';
+    red = 'reduction: self-recall is cheap. put it back.';
+  } else {
+    sent = 'An implication you declared is still uncovered.';
+    red = 'reduction: fund the column that hits the uncovered row — not a new generator.';
+  }
+  document.getElementById('sent').innerHTML = sent;
+  document.getElementById('red').textContent = red;
+}
+render();
+</script>
+</body>
+</html>

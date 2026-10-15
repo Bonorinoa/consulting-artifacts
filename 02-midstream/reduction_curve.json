@@ -1,0 +1,68 @@
+{
+  "baseline": {
+    "label": "full",
+    "empty": false,
+    "L": 0.3275028534767196,
+    "U": 0.40246334068031847,
+    "width": 0.075,
+    "n_admissible": 2
+  },
+  "subsets": [
+    {
+      "label": "drop:m_gps_patience",
+      "empty": false,
+      "L": 0.32750285347671965,
+      "U": 0.32750285347671965,
+      "width": 0.0,
+      "n_admissible": 1
+    },
+    {
+      "label": "drop:m_prompt_a",
+      "empty": false,
+      "L": 0.40246334068031847,
+      "U": 0.40246334068031847,
+      "width": 0.0,
+      "n_admissible": 1
+    },
+    {
+      "label": "drop:m_wvs_q13",
+      "empty": false,
+      "L": 0.32750285347671965,
+      "U": 0.40246334068031847,
+      "width": 0.075,
+      "n_admissible": 2
+    },
+    {
+      "label": "drop:m_wvs_q14",
+      "empty": false,
+      "L": 0.32750285347671965,
+      "U": 0.40246334068031847,
+      "width": 0.075,
+      "n_admissible": 2
+    },
+    {
+      "label": "drop:m_composite",
+      "empty": false,
+      "L": 0.32750285347671965,
+      "U": 0.40246334068031847,
+      "width": 0.075,
+      "n_admissible": 2
+    },
+    {
+      "label": "drop:m_prompt_b",
+      "empty": false,
+      "L": 0.32750285347671965,
+      "U": 0.40246334068031847,
+      "width": 0.075,
+      "n_admissible": 2
+    },
+    {
+      "label": "drop:m_noise",
+      "empty": false,
+      "L": 0.32750285347671965,
+      "U": 0.40246334068031847,
+      "width": 0.075,
+      "n_admissible": 2
+    }
+  ]
+}

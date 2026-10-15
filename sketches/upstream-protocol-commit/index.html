@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Upstream sketch — protocol / commit</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;1,9..144,400&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#f6f1e9;--paper:#faf7f1;--ink:#22201d;--dim:#6b6660;--rule:#ddd6c9;--acc:#7a2e2e;--ok:#2f4f3e}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:Fraunces,Georgia,serif;background:var(--bg);color:var(--ink);line-height:1.45;padding:28px 22px 48px}
+  .kicker{font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--acc)}
+  h1{font-size:28px;font-weight:500;letter-spacing:-.02em;margin:8px 0 6px}
+  .lede{font-size:16px;font-style:italic;color:var(--dim);max-width:62ch;margin-bottom:18px}
+  .card{border:1px solid var(--rule);background:var(--paper);border-radius:2px;padding:18px 20px;margin-bottom:14px}
+  .q{font-size:15px;margin-bottom:12px}
+  label{display:flex;gap:10px;align-items:flex-start;padding:8px 0;border-top:1px solid var(--rule);cursor:pointer;font-size:15px}
+  label:first-of-type{border-top:0}
+  label span.hint{display:block;font-size:12px;color:var(--dim);font-style:italic;margin-top:2px}
+  button{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase;background:transparent;color:var(--acc);border:1px solid var(--acc);padding:8px 14px;cursor:pointer;margin-top:12px}
+  button:disabled{opacity:.4;cursor:not-allowed}
+  .locked{font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--acc);margin-bottom:8px}
+  .find{margin-top:10px;padding-top:10px;border-top:1px dashed var(--rule)}
+  .find h3{font-size:16px;font-weight:500}
+  .find p{font-size:14px;color:var(--dim);margin-top:4px}
+  .verdict{font-size:18px;font-weight:500;margin-top:8px}
+  .verdict em{font-style:italic;color:var(--acc)}
+  .hidden{display:none}
+  .disc{margin-top:16px;font-size:12px;color:var(--dim);max-width:78ch}
+</style>
+</head>
+<body>
+  <div class="kicker">01 · upstream · sketch B — commit</div>
+  <h1>Freeze the ship-criteria before the numbers</h1>
+  <p class="lede">Same Silicus audit. The interaction is the method: you do not get to see the findings until you say what would make you ship.</p>
+
+  <div class="card" id="commit">
+    <p class="q">A student will read a bracketed page citation and open that page. To ship this assistant as “fit to rely on,” which of these must hold?</p>
+    <label><input type="checkbox" data-id="integrity" checked> The index isn’t corrupted
+      <span class="hint">every page retrieves itself first</span></label>
+    <label><input type="checkbox" data-id="citation" checked> The citation identifies a unique page
+      <span class="hint">opening it, the student finds the claim</span></label>
+    <label><input type="checkbox" data-id="abstention" checked> The system can refuse an off-topic question
+      <span class="hint">similarity is not allowed to dress a miss as evidence</span></label>
+    <button id="freeze">Freeze criteria</button>
+  </div>
+
+  <div class="card hidden" id="reveal">
+    <div class="locked">criteria frozen · numbers may now appear</div>
+    <div id="finds"></div>
+    <p class="verdict" id="verdict"></p>
+  </div>
+  <p class="disc">Class A advisory demonstration — self-audit of Silicus-TA 2.0, 706 pages, revision 4c58084. Unchecking a criterion after freeze is labeled post-hoc.</p>
+
+<script>
+const F = {
+  integrity: {title:'Integrity', body:'Self-recall@1 = 1.000 on 706/706 pages. The index is not corrupted. Any failure below is about relevance, not a broken store.'},
+  citation:  {title:'Citation identity', body:'No distinct-page pair reaches cosine 0.99. At ≥0.95 there are 9 pairs in 706 pages, 8 of them inside one file — the [file – p.N] citation already disambiguates.'},
+  abstention:{title:'Abstention', body:'33 of 706 pages (4.7%) are closer to a different course than to any page in their own. separable_by_single_threshold = false. A cosine gate cannot refuse.'},
+};
+document.getElementById('freeze').onclick = () => {
+  const chosen = [...document.querySelectorAll('input[type=checkbox]')].filter(x=>x.checked).map(x=>x.dataset.id);
+  document.getElementById('commit').querySelectorAll('input').forEach(i => i.disabled = true);
+  document.getElementById('freeze').disabled = true;
+  document.getElementById('reveal').classList.remove('hidden');
+  document.getElementById('finds').innerHTML = chosen.map(id =>
+    `<div class="find"><h3>${F[id].title}</h3><p>${F[id].body}</p></div>`
+  ).join('') || '<p>You froze an empty criterion set. That is a finding: you declined to say what “fit to rely on” means.</p>';
+  const v = chosen.includes('abstention')
+    ? 'You required a refusal gate. The audit does not have one. <em>The measure worth building is a labeled in/out query set</em> — not another embedding.'
+    : 'You shipped without requiring refusal. That is allowed — it is a different product. Name it that way.';
+  document.getElementById('verdict').innerHTML = v;
+};
+</script>
+</body>
+</html>

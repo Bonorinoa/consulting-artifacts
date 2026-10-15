@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Consulting — design study (crossbar vs spine)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    /* academic world, lifted from the live site's index.css */
+    --paper: 38 44% 94%;
+    --paper-deep: 36 36% 86%;
+    --ink: 24 40% 8%;
+    --rule: 36 24% 72%;
+    --muted-ink: 28 18% 28%;
+    --oxblood: 11 56% 27%;
+    --subtle: 38 32% 88%;
+    --serif: "Fraunces","Iowan Old Style",Georgia,serif;
+    --mono: "Geist Mono",ui-monospace,"SF Mono",monospace;
+    --ease: cubic-bezier(.16,1,.3,1);
+    --dur: 240ms;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{background:hsl(var(--paper));color:hsl(var(--ink))}
+  body{font-family:var(--serif);-webkit-font-smoothing:antialiased;line-height:1.45}
+  a{color:inherit}
+  .page{max-width:1120px;margin:0 auto;padding:26px 28px 96px}
+
+  /* ---------- nav ---------- */
+  nav{display:flex;align-items:baseline;justify-content:space-between;
+      border-bottom:1px solid hsl(var(--rule));padding-bottom:13px;font-size:13px}
+  nav .who{font-style:italic;font-size:14px}
+  nav .links{display:flex;gap:1.6rem;letter-spacing:.04em;color:hsl(var(--muted-ink))}
+  nav a{text-decoration:none}
+  nav a[aria-current]{color:hsl(var(--oxblood))}
+
+  /* ---------- header ---------- */
+  .kicker{font-family:var(--mono);font-size:11px;letter-spacing:.2em;
+          text-transform:uppercase;color:hsl(var(--oxblood))}
+  header{margin:52px 0 34px;display:grid;grid-template-columns:1.05fr .95fr;
+         gap:40px;align-items:end}
+  h1{font-size:clamp(2.5rem,5.6vw,3.9rem);font-weight:500;letter-spacing:-.03em;
+     line-height:1.03;margin-top:12px}
+  .lede{font-size:1.08rem;font-style:italic;color:hsl(var(--muted-ink));max-width:34rem;padding-bottom:5px}
+  .lede em{font-style:normal;color:hsl(var(--ink))}
+  .thesis{margin-top:12px;font-size:.9rem;color:hsl(var(--muted-ink));font-family:var(--mono);
+          letter-spacing:.02em}
+
+  /* ---------- DAG ---------- */
+  .stagewrap{border-top:1px solid hsl(var(--rule));padding-top:26px}
+  .dag{position:relative;margin-top:34px;transition:padding var(--dur) var(--ease)}
+  .rows{display:flex;flex-direction:column;gap:12px}
+  .row{position:relative;transition:opacity var(--dur) var(--ease)}
+
+  .plate{
+    width:calc(100% - 290px);text-align:left;font:inherit;color:inherit;cursor:pointer;
+    background:hsl(var(--paper));border:1px solid hsl(var(--rule));border-radius:2px;
+    padding:15px 18px 17px;display:block;
+    transition:border-color var(--dur) var(--ease),box-shadow var(--dur) var(--ease),
+               opacity var(--dur) var(--ease),transform var(--dur) var(--ease);
+  }
+  .plate:hover{border-color:hsl(var(--oxblood))}
+  .plate:focus-visible{outline:2px solid hsl(var(--oxblood));outline-offset:2px}
+  .plate .num{font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:hsl(var(--oxblood))}
+  .plate .name{display:block;font-size:1.22rem;font-weight:500;letter-spacing:-.01em;margin-top:3px}
+  .plate .scope{display:block;font-size:.9rem;color:hsl(var(--muted-ink));margin-top:5px}
+  .plate .chips{display:none;gap:8px;margin-top:11px;flex-wrap:wrap}
+  .chip{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;
+        color:hsl(var(--oxblood));border:1px solid hsl(var(--oxblood)/.35);
+        border-radius:999px;padding:2px 8px}
+  .dag[data-stage="upstream"]   .row[data-stage="upstream"] .plate,
+  .dag[data-stage="midstream"]  .row[data-stage="midstream"] .plate,
+  .dag[data-stage="downstream"] .row[data-stage="downstream"] .plate{
+    border-color:hsl(var(--oxblood));
+    box-shadow:6px 6px 0 0 hsl(var(--oxblood)/.16);
+  }
+  .dag[data-stage="upstream"]   .row:not([data-stage="upstream"]),
+  .dag[data-stage="midstream"]  .row:not([data-stage="midstream"]),
+  .dag[data-stage="downstream"] .row:not([data-stage="downstream"]){opacity:.5}
+
+  /* edges: plate right edge -> each method rail.
+     Both rails and edges are anchored to the same right-hand offsets, so the
+     edges land on the rails regardless of viewport width. */
+  .link{position:absolute;top:50%;height:1px;background:hsl(var(--oxblood)/.3);
+        transition:opacity var(--dur) var(--ease),background var(--dur) var(--ease)}
+  .link[data-method="simulation"]{left:calc(100% - 290px);right:182px}
+  .link[data-method="evaluation"]{left:calc(100% - 290px);right:62px}
+  .dot{position:absolute;top:50%;width:7px;height:7px;border-radius:50%;
+       background:hsl(var(--paper));border:1px solid hsl(var(--oxblood)/.55);
+       transform:translate(50%,-50%);transition:background var(--dur) var(--ease)}
+  .dot[data-method="simulation"]{right:179px}
+  .dot[data-method="evaluation"]{right:59px}
+
+  /* the two method rails */
+  .rails{position:absolute;top:0;bottom:0;right:0;width:290px;pointer-events:none}
+  .rail{position:absolute;top:0;bottom:26px;width:1px;background:hsl(var(--oxblood)/.3);
+        pointer-events:auto;cursor:default}
+  .rail[data-method="simulation"]{right:182px}
+  .rail[data-method="evaluation"]{right:62px}
+  .rail .rl{position:absolute;top:-24px;left:50%;transform:translateX(-50%);
+            font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;
+            color:hsl(var(--muted-ink));white-space:nowrap;padding:0 6px;background:hsl(var(--paper))}
+  .rail .rt{position:absolute;bottom:-26px;left:50%;transform:translateX(-50%);
+            font-family:var(--mono);font-size:10px;letter-spacing:.1em;
+            color:hsl(var(--muted-ink));white-space:nowrap}
+
+  /* hover a rail => that method lights up at every stage */
+  .dag[data-hover="simulation"] .link[data-method="simulation"],
+  .dag[data-hover="evaluation"] .link[data-method="evaluation"]{
+    background:hsl(var(--oxblood));height:2px;margin-top:-.5px;
+  }
+  .dag[data-hover="simulation"] .dot[data-method="simulation"],
+  .dag[data-hover="evaluation"] .dot[data-method="evaluation"]{
+    background:hsl(var(--oxblood));border-color:hsl(var(--oxblood));
+  }
+  .dag[data-hover] .link:not([data-method="simulation"]):not([data-method="evaluation"]){opacity:.25}
+  .dag[data-hover="simulation"] .link[data-method="evaluation"],
+  .dag[data-hover="evaluation"] .link[data-method="simulation"]{opacity:.18}
+
+  /* ---------- spine layout variant ---------- */
+  .dag[data-layout="spine"]{padding-right:0}
+  .dag[data-layout="spine"] .rails,
+  .dag[data-layout="spine"] .link,
+  .dag[data-layout="spine"] .dot{display:none}
+  .dag[data-layout="spine"] .plate{width:100%}
+  .dag[data-layout="spine"] .plate .chips{display:flex}
+  .dag[data-layout="spine"] .row + .row::before{
+    content:"";position:absolute;left:26px;top:-12px;height:12px;width:1px;
+    background:hsl(var(--oxblood)/.4)
+  }
+
+  /* ---------- detail panel ---------- */
+  .detail{margin-top:22px;border:1px solid hsl(var(--rule));background:hsl(var(--paper));
+          padding:26px 30px 30px;display:grid;grid-template-columns:1fr auto;gap:26px;align-items:start}
+  .detail h2{font-size:1.4rem;font-weight:500;letter-spacing:-.02em;margin:8px 0 10px}
+  .detail .q{font-style:italic;color:hsl(var(--muted-ink))}
+  .detail p.body{color:hsl(var(--muted-ink));max-width:38rem;margin-top:12px}
+  .detail .red{max-width:38rem;margin-top:16px;padding-top:14px;border-top:1px solid hsl(var(--rule))}
+  .detail .red b{font-weight:500;color:hsl(var(--ink))}
+  .links{display:flex;flex-direction:column;gap:9px;min-width:11.5rem}
+  .links a{font-size:14px;text-decoration:none;border-bottom:1px solid hsl(var(--oxblood)/.35);
+           padding-bottom:2px;width:fit-content}
+  .links a:hover{border-color:hsl(var(--oxblood))}
+  .links .lbl{font-family:var(--mono);font-size:10px;letter-spacing:.14em;
+              text-transform:uppercase;color:hsl(var(--muted-ink));margin-bottom:2px}
+
+  .cta-row{margin-top:34px;display:flex;gap:20px;align-items:baseline;flex-wrap:wrap}
+  .cta{display:inline-block;padding:10px 17px;border:1px solid hsl(var(--oxblood));
+       color:hsl(var(--oxblood));text-decoration:none;font-size:15px;border-radius:2px;
+       transition:background var(--dur) var(--ease),color var(--dur) var(--ease)}
+  .cta:hover{background:hsl(var(--oxblood));color:hsl(var(--paper))}
+  .cta-note{font-size:14px;font-style:italic;color:hsl(var(--muted-ink))}
+
+  /* ---------- how i work ---------- */
+  .how{margin-top:52px;padding-top:20px;border-top:1px solid hsl(var(--rule));
+       display:grid;grid-template-columns:150px 1fr;gap:24px}
+  .how h3{font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;
+          font-weight:400;color:hsl(var(--oxblood))}
+  .how p{max-width:44rem;color:hsl(var(--muted-ink))}
+  .how p + p{margin-top:12px}
+  .how .pull{font-style:italic;color:hsl(var(--ink))}
+
+  /* ---------- writing ---------- */
+  .writing{margin-top:52px;padding-top:20px;border-top:1px solid hsl(var(--rule));
+           display:grid;grid-template-columns:150px 1fr;gap:24px}
+  .writing h3{font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;
+              font-weight:400;color:hsl(var(--oxblood))}
+  .rail3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:28px}
+  .rail3 .kind{font-family:var(--mono);font-size:10px;letter-spacing:.14em;
+               text-transform:uppercase;color:hsl(var(--muted-ink))}
+  .rail3 h4{font-size:1.02rem;font-weight:500;margin:5px 0 6px}
+  .rail3 a{text-decoration:none}
+  .rail3 a:hover{color:hsl(var(--oxblood))}
+  .rail3 p{font-size:14px;color:hsl(var(--muted-ink))}
+
+  /* ---------- form ---------- */
+  .form{margin-top:52px;padding-top:20px;border-top:1px solid hsl(var(--rule));
+        display:grid;grid-template-columns:150px 1fr;gap:24px}
+  .form h3{font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;
+           font-weight:400;color:hsl(var(--oxblood))}
+  form{max-width:36rem}
+  .f{margin-bottom:18px}
+  label{display:block;font-family:var(--mono);font-size:10px;letter-spacing:.16em;
+        text-transform:uppercase;color:hsl(var(--muted-ink));margin-bottom:7px}
+  input,textarea{width:100%;background:hsl(var(--paper));border:1px solid hsl(var(--rule));
+                 border-radius:2px;padding:9px 11px;font:inherit;font-size:15px;color:inherit;
+                 outline:none;transition:border-color var(--dur) var(--ease)}
+  textarea{resize:vertical;min-height:74px}
+  input:focus,textarea:focus{border-color:hsl(var(--oxblood))}
+  button.cta{cursor:pointer;font-family:var(--serif);min-height:44px}
+
+  /* ---------- footer ---------- */
+  footer{margin-top:64px;padding-top:16px;border-top:1px solid hsl(var(--rule));
+         font-family:var(--mono);font-size:10px;letter-spacing:.16em;
+         text-transform:uppercase;color:hsl(var(--muted-ink))}
+
+  /* ---------- tweaks ---------- */
+  .tweaks{position:fixed;left:16px;bottom:16px;z-index:20;background:hsl(var(--paper));
+          border:1px solid hsl(var(--rule));border-radius:2px;padding:9px 12px;
+          font-family:var(--mono);font-size:10px;letter-spacing:.1em;
+          color:hsl(var(--muted-ink));display:flex;gap:12px;align-items:center}
+  .tweaks label{cursor:pointer;display:flex;gap:5px;align-items:center;
+                font-family:var(--mono);font-size:10px;letter-spacing:.1em;
+                text-transform:uppercase;color:inherit;margin:0}
+  .tweaks .sep{width:1px;height:14px;background:hsl(var(--rule))}
+
+  @media (max-width:900px){
+    header{grid-template-columns:1fr;gap:14px}
+    .dag{padding-right:0}
+    .rails,.link,.dot{display:none}
+    .plate .chips{display:flex}
+    .detail,.how,.writing,.form{grid-template-columns:1fr}
+    .rail3{grid-template-columns:1fr}
+  }
+  @media (prefers-reduced-motion:reduce){
+    *{transition:none !important}
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <nav>
+    <a class="who" href="#">A. González-Bonorino</a>
+    <div class="links">
+      <a href="#">Academic</a>
+      <a href="#">Build</a>
+      <a href="#" aria-current="page">Consulting</a>
+    </div>
+  </nav>
+
+  <header>
+    <div>
+      <p class="kicker">§ Independent review</p>
+      <h1>Consulting</h1>
+    </div>
+    <div>
+      <p class="lede">Independent review at three stages of the empirical pipeline — with the
+        criteria <em>frozen before the result</em>, so the finding is one you can act on.</p>
+      <p class="thesis">observe · construct · adjudicate</p>
+    </div>
+  </header>
+
+  <section class="stagewrap">
+    <div class="dag" id="dag" data-layout="crossbar" data-stage="midstream" data-hover="">
+
+      <div class="rails" aria-hidden="true">
+        <span class="rail" data-method="simulation">
+          <span class="rl">simulation</span>
+        </span>
+        <span class="rail" data-method="evaluation">
+          <span class="rl">evaluation</span>
+        </span>
+      </div>
+
+      <div class="rows">
+        <div class="row" data-stage="upstream">
+          <span class="link" data-method="simulation" aria-hidden="true"></span>
+          <span class="link" data-method="evaluation" aria-hidden="true"></span>
+          <span class="dot"  data-method="simulation" aria-hidden="true"></span>
+          <span class="dot"  data-method="evaluation" aria-hidden="true"></span>
+          <button class="plate" data-stage="upstream">
+            <span class="num">01</span>
+            <span class="name">Upstream</span>
+            <span class="scope">define the construct · generate measures · process data with provenance</span>
+            <span class="chips"><span class="chip">simulation</span><span class="chip">evaluation</span></span>
+          </button>
+        </div>
+
+        <div class="row" data-stage="midstream">
+          <span class="link" data-method="simulation" aria-hidden="true"></span>
+          <span class="link" data-method="evaluation" aria-hidden="true"></span>
+          <span class="dot"  data-method="simulation" aria-hidden="true"></span>
+          <span class="dot"  data-method="evaluation" aria-hidden="true"></span>
+          <button class="plate" data-stage="midstream">
+            <span class="num">02</span>
+            <span class="name">Midstream</span>
+            <span class="scope">specification &amp; multiverse analysis · admissible set M* · validity memo</span>
+            <span class="chips"><span class="chip">simulation</span><span class="chip">evaluation</span></span>
+          </button>
+        </div>
+
+        <div class="row" data-stage="downstream">
+          <span class="link" data-method="simulation" aria-hidden="true"></span>
+          <span class="link" data-method="evaluation" aria-hidden="true"></span>
+          <span class="dot"  data-method="simulation" aria-hidden="true"></span>
+          <span class="dot"  data-method="evaluation" aria-hidden="true"></span>
+          <button class="plate" data-stage="downstream">
+            <span class="num">03</span>
+            <span class="name">Downstream</span>
+            <span class="scope">estimand · estimator · identified range [L,U] · robustness</span>
+            <span class="chips"><span class="chip">simulation</span><span class="chip">evaluation</span></span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <aside class="detail">
+      <div>
+        <span class="kicker" id="d-kicker">02 · midstream</span>
+        <h2 id="d-title"></h2>
+        <p class="q" id="d-q"></p>
+        <p class="body" id="d-body"></p>
+        <p class="red" id="d-red"></p>
+      </div>
+      <div class="links">
+        <span class="lbl">Evidence</span>
+        <div id="d-links" style="display:flex;flex-direction:column;gap:9px"></div>
+      </div>
+    </aside>
+
+    <div class="cta-row">
+      <a class="cta" href="#start">Describe a decision</a>
+      <span class="cta-note">Twenty minutes. Deadline and cost of being wrong, not a pitch deck.</span>
+    </div>
+  </section>
+
+  <section class="how">
+    <h3>How I work</h3>
+    <div>
+      <p class="pull">“It is useless to quantify uncertainty without a strategy to reduce it.”</p>
+      <p>Every engagement ends with what to do next, not with a range. The range is the honest
+        part: when the evidence does not identify an answer, that is the finding — reported as
+        such, never sharpened to look decisive.</p>
+      <p>Criteria are frozen before results, the bundle is rerunnable by another reviewer, and
+        where a conclusion rests on an assumption, that assumption is named.</p>
+    </div>
+  </section>
+
+  <section class="writing">
+    <h3>Also written</h3>
+    <div class="rail3">
+      <article>
+        <span class="kind">Substack</span>
+        <h4><a href="https://augustogbonorino.substack.com/p/construct-identified-inference">Construct-Identified Inference</a></h4>
+        <p>Measurement, specification, and sampling as three separate uncertainties.</p>
+      </article>
+      <article>
+        <span class="kind">Journal</span>
+        <h4><a href="https://arxiv.org/abs/2501.06834">Synthetic Cultural Agents</a></h4>
+        <p>Whether simulated respondents preserve human patterns. Failures included.</p>
+      </article>
+      <article>
+        <span class="kind">Column</span>
+        <h4><a href="#">La Gaceta · ADEPA</a></h4>
+        <p>Public writing, not a service tile.</p>
+      </article>
+    </div>
+  </section>
+
+  <section class="form" id="start">
+    <h3>Start here</h3>
+    <form onsubmit="event.preventDefault();alert('mailto: wired in the real build')">
+      <div class="f"><label for="decision">What decision?</label>
+        <textarea id="decision"></textarea></div>
+      <div class="f"><label for="deadline">Deadline</label>
+        <input id="deadline" type="text" /></div>
+      <div class="f"><label for="cost">Cost of being wrong</label>
+        <textarea id="cost"></textarea></div>
+      <div class="f"><label for="email">Your email (optional)</label>
+        <input id="email" type="email" /></div>
+      <button class="cta" type="submit">Describe a decision</button>
+    </form>
+  </section>
+
+  <footer>© 2026 Augusto González-Bonorino · design study, not published</footer>
+</div>
+
+<div class="tweaks">
+  <span>layout</span>
+  <label><input type="radio" name="lay" value="crossbar" checked /> crossbar 3×2</label>
+  <span class="sep"></span>
+  <label><input type="radio" name="lay" value="spine" /> vertical spine</label>
+</div>
+
+<script>
+const STAGES = {
+  upstream: {
+    kicker: "01 · upstream",
+    title: "We need to measure something we can't observe yet",
+    q: "A construct with no instrument, or a data pipeline nobody can audit.",
+    body: "I define the construct, propose a menu of candidate measures, and build the processing chain that produces them — with provenance attached to every transformation, so a reviewer can see where each number came from.",
+    red: "<b>The reduction:</b> which measure is worth building first, and what it would take to justify it.",
+    links: [["Measurement menu template", "#"], ["cvprofiles (open source)", "https://github.com/Bonorinoa/cvprofiles"]]
+  },
+  midstream: {
+    kicker: "02 · midstream",
+    title: "Is our measure entitled to the claim we're making?",
+    q: "The score exists. The label attached to it may not survive scrutiny.",
+    body: "Construct validity treated as partial identification: given a researcher-authored nomological network, the admissible measurement set M* and the construct-identified range [L,U] are computed and reported. Empty sets and wide ranges are findings, not failures.",
+    red: "<b>The reduction:</b> which measure is load-bearing — remove it and the conclusion moves — and which to drop.",
+    links: [["Construct-Identified Inference", "https://augustogbonorino.substack.com/p/construct-identified-inference"], ["cvprofiles (open source)", "https://github.com/Bonorinoa/cvprofiles"]]
+  },
+  downstream: {
+    kicker: "03 · downstream",
+    title: "Is the number defensible — and what do we do?",
+    q: "An estimate is on the table and someone has to act on it.",
+    body: "Estimand, estimator, estimate, then the robustness work: multiverse and sensitivity analysis, honest uncertainty, and an explicit statement of what the evidence does not establish.",
+    red: "<b>The reduction:</b> what to collect next to shrink the range, and whether it is worth the cost.",
+    links: [["Reproducibility audit", "#"], ["Synthetic Cultural Agents", "https://arxiv.org/abs/2501.06834"]]
+  }
+};
+
+const dag = document.getElementById("dag");
+
+function render(stage){
+  const s = STAGES[stage];
+  document.getElementById("d-kicker").textContent = s.kicker;
+  document.getElementById("d-title").textContent  = s.title;
+  document.getElementById("d-q").textContent      = s.q;
+  document.getElementById("d-body").textContent   = s.body;
+  document.getElementById("d-red").innerHTML     = s.red;
+  document.getElementById("d-links").innerHTML =
+    s.links.map(([l,h]) => `<a href="${h}">${l}</a>`).join("");
+  dag.dataset.stage = stage;
+}
+
+document.querySelectorAll(".plate").forEach(p => {
+  p.addEventListener("click", () => render(p.dataset.stage));
+});
+
+// hover a method rail: light that method at every stage
+document.querySelectorAll(".rail").forEach(r => {
+  r.addEventListener("mouseenter", () => { dag.dataset.hover = r.dataset.method; });
+  r.addEventListener("mouseleave", () => { dag.dataset.hover = ""; });
+});
+
+document.querySelectorAll('input[name="lay"]').forEach(radio => {
+  radio.addEventListener("change", e => { dag.dataset.layout = e.target.value; });
+});
+
+// deep-link support: ?layout=spine&stage=downstream  (also handy for screenshots)
+const params = new URLSearchParams(location.search);
+const initLayout = params.get("layout");
+if (initLayout === "spine" || initLayout === "crossbar") {
+  dag.dataset.layout = initLayout;
+  document.querySelector(`input[name="lay"][value="${initLayout}"]`).checked = true;
+}
+render(STAGES[params.get("stage")] ? params.get("stage") : "midstream");
+</script>
+</body>
+</html>
